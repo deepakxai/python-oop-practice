@@ -44,7 +44,12 @@ p = DataPipeline("SalesETL", "MySQL")
 p.run()
 print(p.status)
 p.status = "running"
-p.status = "banana"
+try:
+    p.status = "banana"
+except ValueError as e:
+    print(f"Caught error: {e}")
+
+print(p.get_status())
 print(p.get_status())    # running
 p.finish()
 print(p.get_status())    # completed

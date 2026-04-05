@@ -3,31 +3,32 @@ class DataPipeline:
         self.pipeline_name = pipeline_name
         self.source = source
         self._status = "idle"
+
     @property
-    def status(self):       
+    def status(self):
         return self._status
-    
+
     @status.setter
     def status(self, value):
-        if value in ["idle", "running", "completed", "failed"]:
-            self._status = value
-        else:
-            raise ValueError(f"Invalid status value: {value}. Allowed values are: idle, running, completed, failed.")  
-         
+        allowed = ["idle", "running", "completed", "failed"]
+        if value not in allowed:
+            raise ValueError(f"Invalid status: '{value}'. Allowed: {allowed}")
+        self._status = value
+
     def run(self):
-        self._status = "running"
+        self.status = "running"      # ✓ through setter
         print(f"Pipeline {self.pipeline_name} is now running from {self.source}.")
 
     def finish(self):
-        self._status = "completed"
+        self.status = "completed"    # ✓ through setter
         print(f"Pipeline {self.pipeline_name} completed successfully.")
-    
+
     def reset(self):
-        self._status = "idle"
+        self.status = "idle"         # ✓ through setter
         print(f"Pipeline {self.pipeline_name} has been reset.")
 
     def get_status(self):
-        return self._status          # return, not print
+        return self.status
 
 
 class AIDataPipeline(DataPipeline):
@@ -39,17 +40,21 @@ class AIDataPipeline(DataPipeline):
         print(f"Running AI analysis using {self.model} on {self.pipeline_name} data.")
 
 
-# Testing DataPipeline directly
+# Testing DataPipeline
 p = DataPipeline("SalesETL", "MySQL")
 p.run()
-print(p.status)
-p.status = "running"
-p.status = "banana"
-print(p.get_status())    # running
+print(p.get_status())       # running
+
+try:
+    p.status = "banana"     # triggers ValueError
+except ValueError as e:
+    print(f"Caught error: {e}")
+
+print(p.get_status())       # still running — error was handled
 p.finish()
-print(p.get_status())    # completed
+print(p.get_status())       # completed
 p.reset()
-print(p.get_status())
+print(p.get_status())       # idle
 
 print("---")
 
@@ -58,4 +63,4 @@ ai = AIDataPipeline("SalesETL", "MySQL", "gpt-4")
 ai.run()
 ai.analyze()
 ai.finish()
-print(ai.get_status())   # completed — inherited from parent
+print(ai.get_status())      # completed
